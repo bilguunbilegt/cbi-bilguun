@@ -1,19 +1,21 @@
 # Stage 1: Build the Go application
 FROM golang:1.17-alpine AS go-builder
-ENV PORT 8080
-ENV HOSTDIR 0.0.0.0
-
 WORKDIR /app
+
+# Install Go dependencies
 COPY go.mod go.sum ./
 RUN go mod tidy
-COPY . .
+
+# Copy and build the application
+COPY . ./
 RUN go build -o /main
 
 # Stage 2: Set up Python environment
 FROM python:3.9-slim AS python-env
 
-# Install Python dependencies
-RUN apt-get update && apt-get install -y libpq-dev && \
+# Install system dependencies for Prophet and other libraries
+RUN apt-get update && apt-get install -y \
+    libpq-dev gcc g++ make && \
     pip install --no-cache-dir pandas sqlalchemy psycopg2 prophet dash plotly
 
 WORKDIR /app
@@ -24,16 +26,16 @@ COPY app.py .
 
 # Stage 3: Final multi-service container
 FROM alpine:latest
-RUN apk add --no-cache bash
+
+# Install Bash and dependencies
+RUN apk add --no-cache bash libstdc++ libgcc
 
 # Copy Go binary
 COPY --from=go-builder /main /main
 
 # Copy Python environment and scripts
+COPY --from=python-env /usr/local /usr/local
 COPY --from=python-env /app /app
-COPY --from=python-env /usr/local/lib/python3.9 /usr/local/lib/python3.9
-COPY --from=python-env /usr/local/bin/python3.9 /usr/local/bin/python3.9
-COPY --from=python-env /usr/local/bin/pip /usr/local/bin/pip
 
 WORKDIR /app
 
