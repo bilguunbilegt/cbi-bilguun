@@ -92,3 +92,5 @@ This project uses microservices to collect and process data from the City of Chi
 - Review and update the `cloudbuild.yaml` and `Dockerfile` if deploying with different configurations.
 
 For issues or questions, contact your administrator or refer to the Google Cloud [troubleshooting guide](https://cloud.google.com/docs/troubleshooting).
+
+
