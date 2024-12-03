@@ -21,7 +21,8 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy Python scripts
-COPY forecasting.py .
+COPY covid_forecasting.py .
+COPY covid_dashboard.py .
 COPY app.py .
 
 # Stage 3: Final multi-service container
